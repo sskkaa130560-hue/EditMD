@@ -153,7 +153,8 @@ class MarkdownEditor(tk.Frame):
         self.line_numbers.text_widget = self.text
         self.line_numbers.attach(self.text)
 
-        self.scrollbar = ttk.Scrollbar(self, command=self.text.yview)
+        # Thin scrollbar using tk.Scrollbar (reliable width on Windows)
+        self.scrollbar = tk.Scrollbar(self, command=self.text.yview, width=8)
         self.text.configure(yscrollcommand=self._on_scroll)
 
         self.scrollbar.pack(side="right", fill="y")
@@ -311,6 +312,42 @@ class MarkdownEditor(tk.Frame):
 
     def get_char_count(self):
         return len(self.get_content())
+
+
+class ThinAutoScrollbar(tk.Scrollbar):
+    """Thin auto-hiding scrollbar compatible with HtmlFrame."""
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("width", 8)
+        super().__init__(*args, **kwargs)
+        self.scroll = None
+        self.visible = True
+
+    def set(self, low, high):
+        if self.visible and (self.scroll == 0):
+            self.tk.call("grid", "remove", self)
+            self.visible = False
+        elif not self.visible and (self.scroll == 1):
+            self.grid()
+            self.visible = True
+        elif self.scroll == 2:
+            if float(low) <= 0.0 and float(high) >= 1.0:
+                self.tk.call("grid", "remove", self)
+                self.visible = False
+            else:
+                self.grid()
+                self.visible = True
+        super().set(low, high)
+
+    def set_type(self, scroll, low, high):
+        if self.scroll != scroll:
+            self.scroll = scroll
+        self.set(low, high)
+
+    def pack(self, **kwargs):
+        raise tk.TclError("cannot use pack with this widget")
+
+    def place(self, **kwargs):
+        raise tk.TclError("cannot use place with this widget")
 
 
 class FileTree(tk.Frame):
@@ -492,6 +529,19 @@ class PreviewPane(tk.Frame):
 
         self.html = HtmlFrame(self, messages_enabled=False)
         self.html.pack(fill="both", expand=True)
+
+        # Replace preview scrollbar with a thin auto-hiding one
+        try:
+            self.html._vsb.grid_remove()
+            thin_sb = ThinAutoScrollbar(self.html, orient="vertical",
+                                         command=self.html._html.yview)
+            thin_sb.grid(row=0, column=1, sticky="nsew")
+            self.html._html.configure(yscrollcommand=thin_sb.set_type)
+            self.html._vsb = thin_sb
+            thin_sb.set_type(2, 0.0, 1.0)
+        except Exception:
+            pass
+
         self._update_bg()
 
     def _update_bg(self):
@@ -682,7 +732,8 @@ class EditMDApp:
 
         # Editor + Preview pane
         self.content_pane = tk.PanedWindow(self.root, orient="horizontal", bg=t["border"],
-                                            sashwidth=4, sashrelief="flat")
+                                            sashwidth=2, sashrelief="flat",
+                                            borderwidth=0)
         self.content_pane.pack(fill="both", expand=True)
 
         # Editor
