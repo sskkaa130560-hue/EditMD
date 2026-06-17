@@ -42,11 +42,19 @@ pip install -r requirements.txt
 
 ### 3️⃣ Запуск
 
+**Вариант A — из исходников:**
 ```bash
 python main.py
 ```
 
-Или дважды кликните по **`EditMD.bat`**
+**Вариант B — готовый .exe:**
+Скачайте `EditMD.exe` из раздела [Releases](https://github.com/sskkaa130560-hue/EditMD/releases) и запустите.
+
+Или соберите сами:
+```bash
+pip install pyinstaller
+pyinstaller --onefile --windowed --name EditMD main.py
+```
 
 ---
 

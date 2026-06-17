@@ -9,3 +9,5 @@ build/
 .idea/
 .vscode/
 *.swp
+*.spec
+Screenshot*
