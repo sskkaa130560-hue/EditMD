@@ -1,0 +1,3 @@
+markdown>=3.4
+tkinterweb>=4.0
+pygments>=2.15

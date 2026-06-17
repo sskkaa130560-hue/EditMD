@@ -10,7 +10,7 @@
 ## 📸 Скриншот
 
 <!-- Добавь скриншот: помести файл screenshot.png в папку проекта -->
-<!-- ![Screenshot](screenshot.png) -->
+![Screenshot](screenshot.png)
 
 ---
 
@@ -37,7 +37,7 @@
 ### 2️⃣ Зависимости
 
 ```bash
-pip install markdown tkinterweb pygments
+pip install -r requirements.txt
 ```
 
 ### 3️⃣ Запуск
